@@ -1,3 +1,5 @@
+/* GharSakhi Ulwe -- stylesheet (extracted from index.html) */
+
 /* GharSakhi Ulwe -- stylesheet */
 
 /* ---------- tokens ---------- */
@@ -327,3 +329,26 @@
     .reveal{ opacity:0; transform:translateY(10px); transition:opacity .6s ease, transform .6s ease; }
     .reveal.in{ opacity:1; transform:none; }
   }
+
+
+  /* ---------- hero quick-entry (sector lookup) ---------- */
+  .hero-quick{
+    margin-top:28px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    max-width:460px;
+  }
+  .hero-quick input{
+    flex:1 1 220px;
+    font:inherit;
+    font-size:14.5px;
+    padding:12px 15px;
+    border-radius:10px;
+    border:1px solid var(--panel-line);
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .hero-quick input::placeholder{ color:var(--ink-soft); opacity:.8; }
+  .hero-quick button{ flex:none; }
+  .hero-quick-note{ margin:8px 0 0; font-size:12.5px; color:var(--ink-soft); }
