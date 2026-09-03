@@ -1,3 +1,5 @@
+/* GharSakhi Ulwe -- waitlist form + hero quick-entry + scroll-reveal behaviour (extracted from index.html) */
+
 /* GharSakhi Ulwe -- waitlist form + scroll-reveal behaviour */
 
 (function(){
@@ -55,3 +57,19 @@
       document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
     }
   })();
+
+
+(function(){
+  var quickForm = document.getElementById('hero-quick-form');
+  if (!quickForm) return;
+  quickForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = (document.getElementById('hero-quick-sector').value || '').trim();
+    var sectorField = document.getElementById('wl-sector');
+    if (sectorField && val) sectorField.value = val;
+    var target = document.getElementById('waitlist');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var nameField = document.getElementById('wl-name');
+    if (nameField) window.setTimeout(function(){ nameField.focus(); }, 450);
+  });
+})();
