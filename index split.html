@@ -29,7 +29,7 @@
 <main>
   <section class="hero">
     <div class="wrap hero-grid">
-      <div>
+      <div class="hero-copy">
         <p class="eyebrow">Founding waitlist &middot; Ulwe, Navi Mumbai</p>
         <h1>Ulwe still finds a maid through <em>WhatsApp forwards</em> and building-gate gossip.</h1>
         <p class="lede">Sector after sector of new towers has gone up here — but there's still no verified, on-demand way to book trusted house help, the way residents a few stations away now take for granted. We're building GharSakhi to fix that, starting with the neighbours who join first.</p>
@@ -49,6 +49,7 @@
         </div>
       </div>
       <div class="hero-art" aria-hidden="true">
+        <div class="hero-glow"></div>
         <div class="pin-tag">&#128205; <b>ULWE</b> &middot; Navi Mumbai</div>
         <svg class="skyline" viewBox="0 0 400 330" preserveAspectRatio="xMidYMax slice">
           <g fill="var(--panel-line)" opacity="0.6">
@@ -64,7 +65,7 @@
             <rect x="324" y="150" width="26" height="150" rx="2"/>
             <rect x="358" y="170" width="26" height="130" rx="2"/>
           </g>
-          <g fill="var(--marigold-tint)" opacity="0.9">
+          <g class="skyline-windows" fill="var(--marigold-tint)" opacity="0.9">
             <rect x="148" y="106" width="9" height="9"/><rect x="164" y="106" width="9" height="9"/>
             <rect x="148" y="128" width="9" height="9"/><rect x="164" y="128" width="9" height="9"/>
             <rect x="148" y="150" width="9" height="9"/><rect x="164" y="150" width="9" height="9"/>
@@ -75,6 +76,42 @@
           </g>
           <line x1="0" y1="300" x2="400" y2="300" stroke="var(--panel-line)" stroke-width="2"/>
         </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="credibility-strip">
+    <div class="wrap">
+      <span class="cfact"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v5c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 100% Aadhaar-verified helpers</span>
+      <span class="cfact"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Hourly booking, no contracts</span>
+      <span class="cfact"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/></svg> Ulwe-only, hyperlocal</span>
+      <span class="cfact"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Founder reads every signup</span>
+    </div>
+  </div>
+
+  <section id="compare">
+    <div class="wrap">
+      <p class="eyebrow">01.5 &middot; What changes for you</p>
+      <h2 class="sec-title">The same Saturday morning, minus the scramble</h2>
+      <div class="compare-grid">
+        <div class="compare-col before reveal">
+          <span class="compare-label">Right now, without GharSakhi</span>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> Posting in three WhatsApp groups, hoping someone replies</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> No ID, no background check, no way to verify who's coming</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> Explaining the same thing to the security guard every single time</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> A helper cancels, and there's no backup for the week</li>
+          </ul>
+        </div>
+        <div class="compare-col after reveal">
+          <span class="compare-label">With GharSakhi</span>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Open the app, pick a time, done in under a minute</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Aadhaar-verified name and photo before anyone arrives</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> A booking record your society's guard can check on sight</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Reschedule or rebook instantly &mdash; no scrambling</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -109,20 +146,20 @@
       <h2 class="sec-title">Booking help should feel like booking a cab, not hiring a stranger</h2>
       <div class="how-grid">
         <div class="steps">
-          <div class="step reveal">
+          <div class="step reveal" data-step="0">
             <span class="tag mono">01</span>
             <div><h3>Pick a time, not a person</h3><p>Open the app, choose the service and a slot — right away or scheduled later in the week. No interviews, no price haggling.</p></div>
           </div>
-          <div class="step reveal">
+          <div class="step reveal" data-step="1">
             <span class="tag mono">02</span>
             <div><h3>A verified helper is confirmed</h3><p>You get a name, photo and ID badge before anyone arrives, so your society's security desk can check them in like any pre-approved visitor.</p></div>
           </div>
-          <div class="step reveal">
+          <div class="step reveal" data-step="2">
             <span class="tag mono">03</span>
             <div><h3>Pay by the hour, nothing else</h3><p>Pay only for the hours you book, straight from the app. No contracts, no advances, no monthly minimums.</p></div>
           </div>
         </div>
-        <div class="reveal">
+        <div class="reveal" id="phone-demo">
           <div class="phone-frame">
             <div class="phone-screen">
               <div class="phone-notch"></div>
@@ -227,9 +264,9 @@
         </div>
       </div>
       <div class="stat-strip">
-        <div class="stat reveal"><b>100%</b><span>ID-verified before listing</span></div>
-        <div class="stat reveal"><b>1</b><span>node — Ulwe, nowhere else yet</span></div>
-        <div class="stat reveal"><b>0</b><span>contracts or deposits</span></div>
+        <div class="stat reveal"><b><span class="count-num" data-target="100" data-suffix="%">0%</span></b><span>ID-verified before listing</span></div>
+        <div class="stat reveal"><b><span class="count-num" data-target="1" data-suffix="">0</span></b><span>node — Ulwe, nowhere else yet</span></div>
+        <div class="stat reveal"><b><span class="count-num" data-target="0" data-suffix="">0</span></b><span>contracts or deposits</span></div>
         <div class="stat reveal"><b>1:1</b><span>every signup, read by the founder</span></div>
       </div>
     </div>
@@ -378,6 +415,10 @@
     </div>
   </div>
 </footer>
+
+<div class="mobile-cta">
+  <a href="#waitlist" class="btn btn-primary">Join the founding waitlist</a>
+</div>
 
 <script src="js/main.js" defer></script>
 </body>
