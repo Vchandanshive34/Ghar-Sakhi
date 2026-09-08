@@ -126,6 +126,7 @@
   .btn-primary:hover{ background:var(--marigold-strong); }
   .btn-ghost{ background:transparent; color:var(--ink); border-color:var(--panel-line); }
   .btn-ghost:hover{ border-color:var(--moss); color:var(--moss-strong); }
+  .btn svg{ width:16px; height:16px; flex:none; }
 
   /* ---------- hero ---------- */
   .hero{ padding:64px 0 40px; }
