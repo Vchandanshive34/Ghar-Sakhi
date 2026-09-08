@@ -136,6 +136,7 @@
   .btn-primary:hover{ background:var(--marigold-strong); }
   .btn-ghost{ background:transparent; color:var(--ink); border-color:var(--panel-line); }
   .btn-ghost:hover{ border-color:var(--moss); color:var(--moss-strong); }
+  .btn svg{ width:16px; height:16px; flex:none; }
 
   /* ---------- hero ---------- */
   .hero{ padding:64px 0 40px; }
@@ -900,11 +901,15 @@
           </div>
           <div class="waitlist-submit">
             <button type="submit" class="btn btn-primary">Join the waitlist</button>
-            <span class="required-note">*required &middot; opens your email app, addressed to the GharSakhi founder</span>
+            <a href="https://wa.me/919321395952?text=Hi%20GharSakhi%2C%20I%27d%20like%20to%20join%20the%20Ulwe%20waitlist." target="_blank" rel="noopener" class="btn btn-ghost" id="wl-whatsapp-link">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 3 6.6 3 11c0 2.1.9 4 2.4 5.4L4 21l4.8-1.3C10 20.2 11 20 12 20c5 0 9-3.6 9-9s-4-8-9-8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              WhatsApp us instead
+            </a>
+            <span class="required-note">*required &middot; saved automatically, or reaches us by email / WhatsApp as a backup</span>
           </div>
           <div class="confirm-panel" id="wl-confirm" role="status">
             <b>Almost there</b>
-            Your email app should have opened with your details filled in — just hit send and we'll be in touch as we plan the Ulwe launch. If nothing opened, email us directly at <a href="mailto:gharsakhiofficial@gmail.com">gharsakhiofficial@gmail.com</a>.
+            Your email app should have opened with your details filled in — just hit send and we'll be in touch as we plan the Ulwe launch. If nothing opened, email us directly at <a href="mailto:gharsakhiofficial@gmail.com">gharsakhiofficial@gmail.com</a> or <a href="https://wa.me/919321395952" target="_blank" rel="noopener">message us on WhatsApp</a>.
           </div>
         </form>
       </div>
@@ -953,7 +958,7 @@
         <p>GharSakhi is currently in its founding, pre-launch phase and is not yet a registered booking service. This page exists to gauge interest and recruit founding households ahead of building the full app.</p>
       </div>
       <div>
-        <p>Questions? <a href="mailto:gharsakhiofficial@gmail.com">gharsakhiofficial@gmail.com</a></p>
+        <p>Questions? <a href="mailto:gharsakhiofficial@gmail.com">gharsakhiofficial@gmail.com</a> &middot; <a href="https://wa.me/919321395952?text=Hi%20GharSakhi%2C%20I%27d%20like%20to%20know%20more%20about%20the%20Ulwe%20waitlist." target="_blank" rel="noopener">WhatsApp us</a></p>
       </div>
     </div>
   </div>
@@ -978,6 +983,7 @@ var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 var SUPABASE_TABLE = 'waitlist_signups';
 
 var FALLBACK_EMAIL = 'gharsakhiofficial@gmail.com';
+var WHATSAPP_NUMBER = '919321395952'; // digits only, country code first -- no "+", spaces or dashes (wa.me format)
 var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_SUPABASE') === -1;
 
 (function(){
@@ -999,6 +1005,19 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
     return 'mailto:' + FALLBACK_EMAIL
       + '?subject=' + encodeURIComponent(subject)
       + '&body=' + encodeURIComponent(bodyLines.join('\n'));
+  }
+
+  function buildWhatsApp(name, phone, sector, services, notes){
+    var lines = [
+      'Hi GharSakhi! I just joined the founding waitlist for Ulwe.',
+      '',
+      'Name: ' + (name || '-'),
+      'Phone / WhatsApp: ' + (phone || '-'),
+      'Sector / society: ' + (sector || '-'),
+      'Services interested in: ' + (services && services.length ? services.join(', ') : 'not specified'),
+      'Notes: ' + (notes || '-')
+    ];
+    return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
   }
 
   function showConfirm(html){
@@ -1033,6 +1052,7 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
       }
 
       var mailtoFallback = buildMailto(name, phone, sector, services, notes);
+      var whatsappLink = buildWhatsApp(name, phone, sector, services, notes);
 
       if (!supabaseConfigured) {
         // Supabase isn't wired up yet -- fall back to mailto so the form still works.
@@ -1040,7 +1060,8 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
         showConfirm(
           '<b>Almost there</b>Your email app should have opened with your details filled in ' +
           '&mdash; just hit send. If nothing opened, email us directly at ' +
-          '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>.'
+          '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>, or ' +
+          '<a href="' + whatsappLink + '" target="_blank" rel="noopener">message us on WhatsApp</a> instead.'
         );
         return;
       }
@@ -1069,7 +1090,8 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
             form.reset();
             showConfirm(
               '<b>You\'re on the list</b>Thanks, ' + name.split(' ')[0] + ' &mdash; we\'ve saved your details and ' +
-              'will reach out as we plan the launch for your sector. Questions in the meantime? Email ' +
+              'will reach out as we plan the launch for your sector. Want a faster reply? ' +
+              '<a href="' + whatsappLink + '" target="_blank" rel="noopener">Say hi on WhatsApp</a> too, or email ' +
               '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>.'
             );
           } else {
@@ -1078,7 +1100,8 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
             showConfirm(
               '<b>Almost there</b>We couldn\'t save that automatically, so your email app should have opened ' +
               'with your details instead &mdash; just hit send, or email us directly at ' +
-              '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>.'
+              '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>, or ' +
+              '<a href="' + whatsappLink + '" target="_blank" rel="noopener">message us on WhatsApp</a> instead.'
             );
           }
         })
@@ -1088,10 +1111,27 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
           showConfirm(
             '<b>Almost there</b>We couldn\'t save that automatically, so your email app should have opened ' +
             'with your details instead &mdash; just hit send, or email us directly at ' +
-            '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>.'
+            '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>, or ' +
+            '<a href="' + whatsappLink + '" target="_blank" rel="noopener">message us on WhatsApp</a> instead.'
           );
         });
     });
+
+    // keep the "WhatsApp us instead" quick-link in sync with whatever's been typed so far,
+    // so clicking it any time carries the visitor's current details, not just a blank greeting.
+    var waLink = document.getElementById('wl-whatsapp-link');
+    if (waLink) {
+      var updateWaLink = function(){
+        var n = (document.getElementById('wl-name').value || '').trim();
+        var p = (document.getElementById('wl-phone').value || '').trim();
+        var s = (document.getElementById('wl-sector').value || '').trim();
+        var nt = (document.getElementById('wl-notes').value || '').trim();
+        var svc = Array.prototype.slice.call(form.querySelectorAll('input[name="service"]:checked')).map(function(el){ return el.value; });
+        waLink.href = buildWhatsApp(n, p, s, svc, nt);
+      };
+      form.addEventListener('input', updateWaLink);
+      form.addEventListener('change', updateWaLink);
+    }
   }
 
   if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window){
