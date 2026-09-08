@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GharSakhi Dashboard &mdash; Waitlist signups</title>
+<meta name="description" content="Internal dashboard for GharSakhi Ulwe founding waitlist signups.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%A7%B9%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,470;9..144,560&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --paper:#eef1e8;
+    --panel:#e3e7d9;
+    --panel-line:#cfd4c1;
+    --ink:#182620;
+    --ink-soft:#4c5a51;
+    --moss:#2f5d50;
+    --moss-strong:#1f433a;
+    --moss-tint:#d9e4dc;
+    --marigold:#c96a12;
+    --marigold-strong:#a3540a;
+    --marigold-tint:#f4e2c8;
+    --creek:#3f7178;
+    --good:#2f7d4f;
+    --warn:#b3760f;
+    --bad:#b23b3b;
+    --line:rgba(24,38,32,0.15);
+    --shadow:0 1px 0 rgba(24,38,32,0.06);
+    --radius:12px;
+    --maxw:1180px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#111a15; --panel:#182620; --panel-line:#2a3a32;
+      --ink:#eae7db; --ink-soft:#a9b3a6;
+      --moss:#7cb1a0; --moss-strong:#9fcabc; --moss-tint:#1d2e27;
+      --marigold:#e79a49; --marigold-strong:#f4b876; --marigold-tint:#2c2418;
+      --creek:#7fb8bd; --good:#6fbf8f; --warn:#e0ac52; --bad:#e08080;
+      --line:rgba(234,231,219,0.14); --shadow:0 1px 0 rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111a15; --panel:#182620; --panel-line:#2a3a32;
+    --ink:#eae7db; --ink-soft:#a9b3a6;
+    --moss:#7cb1a0; --moss-strong:#9fcabc; --moss-tint:#1d2e27;
+    --marigold:#e79a49; --marigold-strong:#f4b876; --marigold-tint:#2c2418;
+    --creek:#7fb8bd; --good:#6fbf8f; --warn:#e0ac52; --bad:#e08080;
+    --line:rgba(234,231,219,0.14); --shadow:0 1px 0 rgba(0,0,0,0.3);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:15px; line-height:1.5;
+  }
+  h1,h2{ font-family:"Fraunces", ui-serif, Georgia, serif; font-weight:560; margin:0; color:var(--ink); }
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
+  a{ color:var(--moss-strong); }
+  [hidden]{ display:none !important; }
+  :focus-visible{ outline:2px solid var(--marigold); outline-offset:2px; }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+
+  header.bar{
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+  }
+  header.bar .wrap{
+    padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .brand{ display:flex; align-items:baseline; gap:8px; font-family:"Fraunces",serif; font-weight:560; font-size:19px; }
+  .brand .tag{
+    font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--moss-strong); border:1px solid var(--panel-line); border-radius:5px; padding:2px 6px;
+  }
+  .btn{
+    font-family:"IBM Plex Sans",sans-serif; font-weight:600; font-size:13.5px;
+    border-radius:9px; padding:9px 16px; border:1px solid var(--panel-line);
+    background:var(--paper); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+  }
+  .btn:hover{ border-color:var(--moss); color:var(--moss-strong); }
+  .btn-primary{ background:var(--moss); border-color:var(--moss); color:#f4f8f4; }
+  .btn-primary:hover{ background:var(--moss-strong); border-color:var(--moss-strong); color:#f4f8f4; }
+  .btn:disabled{ opacity:.55; cursor:default; }
+
+  /* ---------- login ---------- */
+  #login-view{ min-height:calc(100vh - 61px); display:flex; align-items:center; justify-content:center; padding:32px 20px; }
+  .login-card{
+    width:100%; max-width:380px; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:16px; padding:32px;
+  }
+  .login-card h1{ font-size:22px; margin-bottom:6px; }
+  .login-card p.sub{ margin:0 0 22px; color:var(--ink-soft); font-size:14px; }
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  .field label{ font-size:12.5px; font-weight:600; }
+  .field input{
+    font:inherit; font-size:14.5px; padding:10px 12px; border-radius:8px;
+    border:1px solid var(--panel-line); background:var(--paper); color:var(--ink);
+  }
+  .login-error{
+    display:none; margin:0 0 16px; padding:10px 12px; border-radius:8px;
+    background:var(--marigold-tint); color:var(--marigold-strong); font-size:13px; border:1px solid var(--marigold);
+  }
+  .login-error.show{ display:block; }
+  .login-card .btn{ width:100%; justify-content:center; padding:11px; }
+
+  /* ---------- dashboard shell ---------- */
+  main.dash{ padding:28px 0 60px; }
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:26px;
+  }
+  .toolbar-left{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .search-box{
+    display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:9px; padding:8px 12px; min-width:240px;
+  }
+  .search-box svg{ width:15px; height:15px; color:var(--ink-soft); flex:none; }
+  .search-box input{ border:none; background:transparent; font:inherit; font-size:14px; color:var(--ink); width:100%; outline:none; }
+  .meta-note{ font-size:12.5px; color:var(--ink-soft); }
+
+  /* ---------- stat tiles ---------- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:30px; }
+  @media (max-width:820px){ .stat-grid{grid-template-columns:1fr 1fr;} }
+  .stat-tile{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:18px 20px; }
+  .stat-tile .label{ font-size:12px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; font-family:"IBM Plex Mono",monospace; }
+  .stat-tile .value{ font-family:"Fraunces",serif; font-size:28px; font-weight:560; margin-top:6px; color:var(--moss-strong); }
+  .stat-tile .value.small{ font-size:18px; line-height:1.3; }
+
+  /* ---------- breakdown bars ---------- */
+  .panels{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:30px; }
+  @media (max-width:820px){ .panels{grid-template-columns:1fr;} }
+  .panel{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:22px; }
+  .panel h2{ font-size:16px; margin-bottom:16px; }
+  .bar-row{ display:grid; grid-template-columns:120px 1fr 34px; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; }
+  .bar-row .bar-label{ color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bar-track{ height:9px; border-radius:5px; background:var(--panel-line); overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--moss); border-radius:5px; }
+  .bar-row .bar-count{ text-align:right; font-family:"IBM Plex Mono",monospace; color:var(--ink-soft); }
+  .panel .empty{ color:var(--ink-soft); font-size:13.5px; }
+
+  /* ---------- table ---------- */
+  .table-panel{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); overflow:hidden; }
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:820px; }
+  thead th{
+    text-align:left; font-family:"IBM Plex Mono",monospace; font-size:11px; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--ink-soft); padding:12px 16px; border-bottom:1px solid var(--panel-line);
+    white-space:nowrap;
+  }
+  tbody td{ padding:12px 16px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--moss-tint); }
+  td.name{ font-weight:600; }
+  td.phone, td.date{ font-family:"IBM Plex Mono",monospace; font-size:12.5px; white-space:nowrap; }
+  td.services, td.notes{ color:var(--ink-soft); max-width:220px; }
+  .empty-state, .loading-state, .error-state{ padding:60px 24px; text-align:center; color:var(--ink-soft); }
+  .error-state{ color:var(--bad); }
+
+  .footer-note{ margin-top:24px; font-size:12px; color:var(--ink-soft); text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">GharSakhi <span class="tag">Dashboard</span></div>
+    <button id="signout-btn" class="btn" hidden>Sign out</button>
+  </div>
+</header>
+
+<div id="login-view">
+  <div class="login-card">
+    <h1>Sign in</h1>
+    <p class="sub">This dashboard shows real names and phone numbers &mdash; only the GharSakhi founder account can see it.</p>
+    <div id="login-error" class="login-error"></div>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<main class="dash wrap" id="dash-view" hidden>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="search-input" placeholder="Search name, phone, sector...">
+      </div>
+      <button class="btn" id="refresh-btn">Refresh</button>
+      <button class="btn" id="export-btn">Export CSV</button>
+    </div>
+    <span class="meta-note" id="last-updated"></span>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-tile"><div class="label">Total signups</div><div class="value" id="stat-total">&mdash;</div></div>
+    <div class="stat-tile"><div class="label">New this week</div><div class="value" id="stat-week">&mdash;</div></div>
+    <div class="stat-tile"><div class="label">Top sector</div><div class="value small" id="stat-sector">&mdash;</div></div>
+    <div class="stat-tile"><div class="label">Top requested service</div><div class="value small" id="stat-service">&mdash;</div></div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h2>Signups by sector</h2>
+      <div id="sector-bars"></div>
+    </div>
+    <div class="panel">
+      <h2>Requested services</h2>
+      <div id="service-bars"></div>
+    </div>
+  </div>
+
+  <div class="table-panel">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Phone</th><th>Sector / society</th><th>Services</th><th>Notes</th><th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="signups-tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="empty-state" hidden>No signups match this search.</div>
+    <div class="loading-state" id="loading-state">Loading signups&hellip;</div>
+    <div class="error-state" id="error-state" hidden></div>
+  </div>
+
+  <p class="footer-note">This page is unlisted (not linked from the public site) and requires the founder's Supabase login &mdash; but treat this URL as sensitive, since it renders real visitor phone numbers.</p>
+</main>
+
+<script>
+  /* ============================================================
+     SUPABASE CONFIG -- same project as the public site's js/main.js.
+     Fill in after creating your project (Settings -> API).
+     ============================================================ */
+  var SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+  var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  var TABLE = 'waitlist_signups';
+
+  var sb = null;
+  var allRows = [];
+
+  function $(id){ return document.getElementById(id); }
+
+  function initClient(){
+    if (!window.supabase || SUPABASE_URL.indexOf('YOUR_SUPABASE') !== -1) return null;
+    return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+
+  function showLogin(message){
+    $('login-view').hidden = false;
+    $('dash-view').hidden = true;
+    $('signout-btn').hidden = true;
+    if (message){
+      $('login-error').textContent = message;
+      $('login-error').classList.add('show');
+    }
+  }
+
+  function showDashboard(){
+    $('login-view').hidden = true;
+    $('dash-view').hidden = false;
+    $('signout-btn').hidden = false;
+    loadData();
+  }
+
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function formatDate(iso){
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ' ' +
+             d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return iso; }
+  }
+
+  function renderBars(containerId, counts){
+    var el = $(containerId);
+    var entries = Object.keys(counts).map(function(k){ return [k, counts[k]]; });
+    entries.sort(function(a,b){ return b[1] - a[1]; });
+    entries = entries.slice(0, 6);
+    if (!entries.length){
+      el.innerHTML = '<p class="empty">Nothing to show yet.</p>';
+      return;
+    }
+    var max = entries[0][1];
+    el.innerHTML = entries.map(function(e){
+      var pct = Math.max(6, Math.round((e[1] / max) * 100));
+      return '<div class="bar-row">' +
+        '<span class="bar-label" title="' + escapeHtml(e[0]) + '">' + escapeHtml(e[0]) + '</span>' +
+        '<span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span>' +
+        '<span class="bar-count">' + e[1] + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderStatsAndBars(rows){
+    $('stat-total').textContent = rows.length;
+
+    var weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    var thisWeek = rows.filter(function(r){ return new Date(r.created_at).getTime() >= weekAgo; }).length;
+    $('stat-week').textContent = thisWeek;
+
+    var sectorCounts = {};
+    var serviceCounts = {};
+    rows.forEach(function(r){
+      var sector = (r.sector || 'Unspecified').trim();
+      sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+      (r.services || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(s){
+        serviceCounts[s] = (serviceCounts[s] || 0) + 1;
+      });
+    });
+
+    var topSector = Object.keys(sectorCounts).sort(function(a,b){ return sectorCounts[b]-sectorCounts[a]; })[0];
+    var topService = Object.keys(serviceCounts).sort(function(a,b){ return serviceCounts[b]-serviceCounts[a]; })[0];
+    $('stat-sector').textContent = topSector || '—';
+    $('stat-service').textContent = topService || '—';
+
+    renderBars('sector-bars', sectorCounts);
+    renderBars('service-bars', serviceCounts);
+  }
+
+  function renderTable(rows){
+    var tbody = $('signups-tbody');
+    $('empty-state').hidden = rows.length !== 0;
+    tbody.innerHTML = rows.map(function(r){
+      return '<tr>' +
+        '<td class="name">' + escapeHtml(r.name) + '</td>' +
+        '<td class="phone">' + escapeHtml(r.phone) + '</td>' +
+        '<td>' + escapeHtml(r.sector) + '</td>' +
+        '<td class="services">' + escapeHtml(r.services || '—') + '</td>' +
+        '<td class="notes">' + escapeHtml(r.notes || '—') + '</td>' +
+        '<td class="date">' + escapeHtml(formatDate(r.created_at)) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function applySearch(){
+    var q = ($('search-input').value || '').trim().toLowerCase();
+    if (!q){ renderTable(allRows); return; }
+    var filtered = allRows.filter(function(r){
+      return (r.name || '').toLowerCase().indexOf(q) !== -1 ||
+             (r.phone || '').toLowerCase().indexOf(q) !== -1 ||
+             (r.sector || '').toLowerCase().indexOf(q) !== -1;
+    });
+    renderTable(filtered);
+  }
+
+  function exportCsv(){
+    var rows = allRows;
+    var header = ['Name','Phone','Sector','Services','Notes','Joined'];
+    var lines = [header.join(',')];
+    rows.forEach(function(r){
+      var cells = [r.name, r.phone, r.sector, r.services, r.notes, r.created_at].map(function(v){
+        var s = String(v == null ? '' : v).replace(/"/g, '""');
+        return '"' + s + '"';
+      });
+      lines.push(cells.join(','));
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'gharsakhi-waitlist-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function loadData(){
+    $('loading-state').hidden = false;
+    $('error-state').hidden = true;
+    $('empty-state').hidden = true;
+
+    sb.from(TABLE).select('*').order('created_at', { ascending: false }).then(function(res){
+      $('loading-state').hidden = true;
+      if (res.error){
+        $('error-state').hidden = false;
+        $('error-state').textContent = 'Could not load signups: ' + res.error.message;
+        return;
+      }
+      allRows = res.data || [];
+      $('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+      renderStatsAndBars(allRows);
+      applySearch();
+      if (!allRows.length){
+        $('error-state').hidden = false;
+        $('error-state').style.color = 'var(--ink-soft)';
+        $('error-state').textContent = 'No signups visible. If you expect some, double-check you\'re signed in with the founder account set up in schema.sql.';
+      }
+    }).catch(function(err){
+      $('loading-state').hidden = true;
+      $('error-state').hidden = false;
+      $('error-state').textContent = 'Could not load signups: ' + (err && err.message ? err.message : err);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    sb = initClient();
+
+    if (!sb){
+      showLogin('Supabase isn\'t configured yet — fill in SUPABASE_URL and SUPABASE_ANON_KEY near the bottom of dashboard.html.');
+      $('login-btn').disabled = true;
+      return;
+    }
+
+    sb.auth.getSession().then(function(res){
+      if (res.data && res.data.session) { showDashboard(); } else { showLogin(); }
+    });
+
+    $('login-form').addEventListener('submit', function(e){
+      e.preventDefault();
+      $('login-error').classList.remove('show');
+      $('login-btn').disabled = true;
+      $('login-btn').textContent = 'Signing in…';
+      sb.auth.signInWithPassword({
+        email: $('login-email').value.trim(),
+        password: $('login-password').value
+      }).then(function(res){
+        $('login-btn').disabled = false;
+        $('login-btn').textContent = 'Sign in';
+        if (res.error){
+          $('login-error').textContent = res.error.message;
+          $('login-error').classList.add('show');
+          return;
+        }
+        showDashboard();
+      });
+    });
+
+    $('signout-btn').addEventListener('click', function(){
+      sb.auth.signOut().then(function(){ showLogin(); });
+    });
+
+    $('refresh-btn').addEventListener('click', loadData);
+    $('export-btn').addEventListener('click', exportCsv);
+    $('search-input').addEventListener('input', applySearch);
+  });
+</script>
+</body>
+</html>
