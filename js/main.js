@@ -1,6 +1,7 @@
-/* GharSakhi Ulwe -- waitlist form + hero quick-entry + animations (extracted from index.html) */
+/* GharSakhi -- v2 redesign behaviour (extracted from index.html) */
 
-/* GharSakhi Ulwe -- waitlist form (Supabase) + hero quick-entry + scroll-reveal behaviour */
+/* GharSakhi Ulwe -- v2 redesign behaviour: waitlist submit (Supabase + email + WhatsApp),
+   scroll reveals, service selector, how-it-works journey, sector-check, FAQ accordion. */
 
 /* ============================================================
    SUPABASE CONFIG -- fill these in after you create your project
@@ -17,6 +18,7 @@ var FALLBACK_EMAIL = 'gharsakhiofficial@gmail.com';
 var WHATSAPP_NUMBER = '919321395952'; // digits only, country code first -- no "+", spaces or dashes (wa.me format)
 var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_SUPABASE') === -1;
 
+/* ---------- waitlist form: Supabase insert, with mailto + WhatsApp fallback ---------- */
 (function(){
   var form = document.getElementById('waitlist-form');
   var confirmPanel = document.getElementById('wl-confirm');
@@ -28,7 +30,7 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
       'New founding waitlist signup for GharSakhi (Ulwe)',
       '',
       'Name: ' + name,
-      'Phone / WhatsApp: ' + phone,
+      'WhatsApp number: ' + phone,
       'Sector / society: ' + sector,
       'Services interested in: ' + (services.length ? services.join(', ') : 'not specified'),
       'Notes: ' + (notes || '-')
@@ -43,7 +45,7 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
       'Hi GharSakhi! I just joined the founding waitlist for Ulwe.',
       '',
       'Name: ' + (name || '-'),
-      'Phone / WhatsApp: ' + (phone || '-'),
+      'WhatsApp number: ' + (phone || '-'),
       'Sector / society: ' + (sector || '-'),
       'Services interested in: ' + (services && services.length ? services.join(', ') : 'not specified'),
       'Notes: ' + (notes || '-')
@@ -61,29 +63,39 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
   function setSubmitting(isSubmitting){
     if (!submitBtn) return;
     submitBtn.disabled = isSubmitting;
-    submitBtn.textContent = isSubmitting ? 'Joining...' : 'Join the waitlist';
+    submitBtn.textContent = isSubmitting ? 'Joining...' : submitBtn.getAttribute('data-default-label') || 'Join the Founding Waitlist';
+  }
+  if (submitBtn) submitBtn.setAttribute('data-default-label', submitBtn.textContent);
+
+  function gatherFields(){
+    var name = (document.getElementById('wl-name').value || '').trim();
+    var phone = (document.getElementById('wl-phone').value || '').trim();
+    var sectorOnly = (document.getElementById('wl-sector').value || '').trim();
+    var society = (document.getElementById('wl-society').value || '').trim();
+    var time = (document.getElementById('wl-time').value || '').trim();
+    var notesOnly = (document.getElementById('wl-notes').value || '').trim();
+    var services = Array.prototype.slice.call(form.querySelectorAll('input[name="service"]:checked')).map(function(el){ return el.value; });
+    var sector = sectorOnly + (society ? ' — ' + society : '');
+    var notes = (time ? 'Preferred time: ' + time + '. ' : '') + notesOnly;
+    return { name: name, phone: phone, sector: sector, services: services, notes: notes.trim(), sectorOnly: sectorOnly };
   }
 
   if (form) {
     form.addEventListener('submit', function(e){
       e.preventDefault();
-      var name = (document.getElementById('wl-name').value || '').trim();
-      var phone = (document.getElementById('wl-phone').value || '').trim();
-      var sector = (document.getElementById('wl-sector').value || '').trim();
-      var notes = (document.getElementById('wl-notes').value || '').trim();
-      var services = Array.prototype.slice.call(form.querySelectorAll('input[name="service"]:checked')).map(function(el){ return el.value; });
+      var f = gatherFields();
 
       var missing = [];
-      if (!name) missing.push('your name');
-      if (!phone) missing.push('a phone number');
-      if (!sector) missing.push('your sector / society');
+      if (!f.name) missing.push('your name');
+      if (!f.phone) missing.push('a WhatsApp number');
+      if (!f.sectorOnly) missing.push('your sector');
       if (missing.length){
         alert('Please add ' + missing.join(', ') + ' before joining the waitlist.');
         return;
       }
 
-      var mailtoFallback = buildMailto(name, phone, sector, services, notes);
-      var whatsappLink = buildWhatsApp(name, phone, sector, services, notes);
+      var mailtoFallback = buildMailto(f.name, f.phone, f.sector, f.services, f.notes);
+      var whatsappLink = buildWhatsApp(f.name, f.phone, f.sector, f.services, f.notes);
 
       if (!supabaseConfigured) {
         // Supabase isn't wired up yet -- fall back to mailto so the form still works.
@@ -108,11 +120,11 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
           'Prefer': 'return=minimal'
         },
         body: JSON.stringify([{
-          name: name,
-          phone: phone,
-          sector: sector,
-          services: services.join(', '),
-          notes: notes || null
+          name: f.name,
+          phone: f.phone,
+          sector: f.sector,
+          services: f.services.join(', '),
+          notes: f.notes || null
         }])
       })
         .then(function(res){
@@ -120,7 +132,7 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
           if (res.ok) {
             form.reset();
             showConfirm(
-              '<b>You\'re on the list</b>Thanks, ' + name.split(' ')[0] + ' &mdash; we\'ve saved your details and ' +
+              '<b>You\'re on the list</b>Thanks, ' + f.name.split(' ')[0] + ' &mdash; we\'ve saved your details and ' +
               'will reach out as we plan the launch for your sector. Want a faster reply? ' +
               '<a href="' + whatsappLink + '" target="_blank" rel="noopener">Say hi on WhatsApp</a> too, or email ' +
               '<a href="mailto:' + FALLBACK_EMAIL + '">' + FALLBACK_EMAIL + '</a>.'
@@ -148,24 +160,35 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
         });
     });
 
-    // keep the "WhatsApp us instead" quick-link in sync with whatever's been typed so far,
-    // so clicking it any time carries the visitor's current details, not just a blank greeting.
+    // keep the "WhatsApp us instead" quick-link in sync with whatever's been typed so far.
     var waLink = document.getElementById('wl-whatsapp-link');
     if (waLink) {
       var updateWaLink = function(){
-        var n = (document.getElementById('wl-name').value || '').trim();
-        var p = (document.getElementById('wl-phone').value || '').trim();
-        var s = (document.getElementById('wl-sector').value || '').trim();
-        var nt = (document.getElementById('wl-notes').value || '').trim();
-        var svc = Array.prototype.slice.call(form.querySelectorAll('input[name="service"]:checked')).map(function(el){ return el.value; });
-        waLink.href = buildWhatsApp(n, p, s, svc, nt);
+        var f = gatherFields();
+        waLink.href = buildWhatsApp(f.name, f.phone, f.sector, f.services, f.notes);
       };
       form.addEventListener('input', updateWaLink);
       form.addEventListener('change', updateWaLink);
     }
   }
 
-  if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window){
+  window.__gharsakhiFillWaitlist = function(opts){
+    opts = opts || {};
+    if (opts.sector){
+      var sectorField = document.getElementById('wl-sector');
+      if (sectorField) sectorField.value = opts.sector;
+    }
+    if (opts.service){
+      var cb = form ? form.querySelector('input[name="service"][value="' + opts.service.replace(/"/g,'\\"') + '"]') : null;
+      if (cb) cb.checked = true;
+    }
+  };
+})();
+
+/* ---------- scroll reveals ---------- */
+(function(){
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion && 'IntersectionObserver' in window){
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         if (entry.isIntersecting){
@@ -180,84 +203,108 @@ var supabaseConfigured = SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1 && SUPABAS
   }
 })();
 
-
+/* ---------- hero demo booking card: "Confirm Request" routes to the real waitlist ---------- */
 (function(){
-  // count-up numerals in the trust stat strip, once each is scrolled into view
-  var counted = new WeakSet();
-  var countEls = document.querySelectorAll('.count-num');
-  if (countEls.length && 'IntersectionObserver' in window){
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var countIo = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if (!entry.isIntersecting || counted.has(entry.target)) return;
-        counted.add(entry.target);
-        var el = entry.target;
-        var target = parseFloat(el.getAttribute('data-target') || '0');
-        var suffix = el.getAttribute('data-suffix') || '';
-        if (reduceMotion){
-          el.textContent = target + suffix;
-          countIo.unobserve(el);
-          return;
-        }
-        var start = null;
-        var duration = 900;
-        function step(ts){
-          if (start === null) start = ts;
-          var progress = Math.min(1, (ts - start) / duration);
-          var eased = 1 - Math.pow(1 - progress, 3);
-          el.textContent = Math.round(target * eased) + suffix;
-          if (progress < 1) window.requestAnimationFrame(step);
-        }
-        window.requestAnimationFrame(step);
-        countIo.unobserve(el);
-      });
-    }, { threshold: 0.6 });
-    countEls.forEach(function(el){ countIo.observe(el); });
-  }
+  var btn = document.getElementById('demo-confirm-btn');
+  if (!btn) return;
+  btn.addEventListener('click', function(){
+    if (window.__gharsakhiFillWaitlist) window.__gharsakhiFillWaitlist({ sector: 'Sector 19', service: 'Sweeping & mopping' });
+    var target = document.getElementById('waitlist');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var nameField = document.getElementById('wl-name');
+    if (nameField) window.setTimeout(function(){ nameField.focus(); }, 420);
+  });
+})();
 
-  // auto-cycling "how it works" demo -- highlights each step in turn
-  var stepEls = document.querySelectorAll('.step[data-step]');
-  var phoneDemo = document.getElementById('phone-demo');
-  if (stepEls.length && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
-    var activeIdx = 0;
-    var cycleTimer = null;
-    function setActive(idx){
-      stepEls.forEach(function(el){ el.classList.remove('active'); });
-      if (stepEls[idx]) stepEls[idx].classList.add('active');
-    }
-    function tick(){ activeIdx = (activeIdx + 1) % stepEls.length; setActive(activeIdx); }
-    function startCycle(){ if (!cycleTimer) cycleTimer = window.setInterval(tick, 2800); }
-    function stopCycle(){ if (cycleTimer){ window.clearInterval(cycleTimer); cycleTimer = null; } }
-    setActive(0);
+/* ---------- how-it-works journey: steps drive the phone screens ---------- */
+(function(){
+  var steps = document.querySelectorAll('.jstep[data-step]');
+  var screens = document.querySelectorAll('.pscreen[data-screen]');
+  if (!steps.length || !screens.length) return;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var activeIdx = 0;
+  var cycleTimer = null;
+
+  function setActive(idx){
+    activeIdx = idx;
+    steps.forEach(function(el, i){
+      var isActive = i === idx;
+      el.classList.toggle('active', isActive);
+      el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    screens.forEach(function(el){ el.classList.toggle('active', el.getAttribute('data-screen') === String(idx)); });
+  }
+  function tick(){ setActive((activeIdx + 1) % steps.length); }
+  function startCycle(){ if (!reduceMotion && !cycleTimer) cycleTimer = window.setInterval(tick, 3200); }
+  function stopCycle(){ if (cycleTimer){ window.clearInterval(cycleTimer); cycleTimer = null; } }
+
+  steps.forEach(function(el, i){
+    el.addEventListener('click', function(){ stopCycle(); setActive(i); });
+    el.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); stopCycle(); setActive(i); }
+    });
+    el.addEventListener('mouseenter', stopCycle);
+    el.addEventListener('focus', stopCycle);
+  });
+  var host = steps[0].closest('.journey');
+  if (host){
+    host.addEventListener('mouseleave', startCycle);
     if ('IntersectionObserver' in window){
-      var stepsHost = stepEls[0].parentElement;
-      var cycleIo = new IntersectionObserver(function(entries){
+      var jio = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){ if (entry.isIntersecting) startCycle(); else stopCycle(); });
       }, { threshold: 0.3 });
-      cycleIo.observe(stepsHost);
-      if (phoneDemo){
-        phoneDemo.addEventListener('mouseenter', stopCycle);
-        phoneDemo.addEventListener('mouseleave', startCycle);
-        stepsHost.addEventListener('mouseenter', stopCycle);
-        stepsHost.addEventListener('mouseleave', startCycle);
-      }
+      jio.observe(host);
     } else {
       startCycle();
     }
   }
 })();
 
+/* ---------- service selector: pick a service, it syncs to the waitlist form ---------- */
 (function(){
-  var quickForm = document.getElementById('hero-quick-form');
-  if (!quickForm) return;
-  quickForm.addEventListener('submit', function(e){
+  var cards = document.querySelectorAll('.svc-card[data-service]');
+  if (!cards.length) return;
+  cards.forEach(function(card){
+    card.addEventListener('click', function(){
+      var wasPicked = card.classList.contains('picked');
+      card.classList.toggle('picked');
+      var service = card.getAttribute('data-service');
+      if (window.__gharsakhiFillWaitlist) window.__gharsakhiFillWaitlist({ service: service });
+      if (!wasPicked){
+        var target = document.getElementById('waitlist');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+
+/* ---------- sector check: honest, no fake lookup -- just notes interest & pre-fills the form ---------- */
+(function(){
+  var sform = document.getElementById('sector-check-form');
+  var result = document.getElementById('sector-check-result');
+  if (!sform || !result) return;
+  sform.addEventListener('submit', function(e){
     e.preventDefault();
-    var val = (document.getElementById('hero-quick-sector').value || '').trim();
-    var sectorField = document.getElementById('wl-sector');
-    if (sectorField && val) sectorField.value = val;
-    var target = document.getElementById('waitlist');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    var nameField = document.getElementById('wl-name');
-    if (nameField) window.setTimeout(function(){ nameField.focus(); }, 450);
+    var val = (document.getElementById('sector-check-input').value || '').trim();
+    if (!val){
+      result.textContent = 'Type your sector above, e.g. "Sector 19".';
+      result.classList.remove('show');
+      return;
+    }
+    if (window.__gharsakhiFillWaitlist) window.__gharsakhiFillWaitlist({ sector: val });
+    result.innerHTML = 'Got it &mdash; we\'ve noted interest in <b>' + val.replace(/</g,'&lt;') + '</b>. We\'ll prioritise wherever the waitlist fills up fastest. <a href="#waitlist">Join the waitlist &rarr;</a>';
+    result.classList.add('show');
+  });
+})();
+
+/* ---------- FAQ: single-open accordion feel ---------- */
+(function(){
+  var items = document.querySelectorAll('.faq-list details');
+  items.forEach(function(item){
+    item.addEventListener('toggle', function(){
+      if (item.open){
+        items.forEach(function(other){ if (other !== item) other.open = false; });
+      }
+    });
   });
 })();
